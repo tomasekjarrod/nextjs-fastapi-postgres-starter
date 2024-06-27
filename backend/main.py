@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from db_engine import engine
 from models import User, Thread, ThreadMessage
-
+from datetime import datetime
+from typing import List, Optional
 seed_user_if_needed()
 
 app = FastAPI()
@@ -16,17 +17,35 @@ class UserRead(BaseModel):
     id: int
     name: str
 
-class ThreadRead(BaseModel):
+class ThreadMessageBase(BaseModel):
+    content: str
+    sender_id: Optional[int] = None
+    thread_id: int
+
+class ThreadMessageCreate(ThreadMessageBase):
+    pass
+
+class ThreadMessageRead(ThreadMessageBase):
     id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ThreadBase(BaseModel):
+    created_by: int
+
+class ThreadCreate(ThreadBase):
+    pass
+
+class ThreadRead(ThreadBase):
+    id: int
+    created_at: datetime
     
-class ThreadCreate(BaseModel):
-    pass
+    messages: List[ThreadMessageRead]
+    class Config:
+        from_attributes = True
 
-class ThreadMessageRead(BaseModel):
-    id: int
-
-class ThreadMessageCreate(BaseModel):
-    pass
 
 @app.get("/users/me")
 async def get_my_user():
@@ -40,7 +59,8 @@ async def get_my_user():
                 raise HTTPException(status_code=404, detail="User not found")
             return UserRead(id=user.id, name=user.name)
 
-@app.get("/threads/{thread_id}")
+
+@app.get("/threads/{thread_id}", response_model=ThreadRead)
 async def get_thread(thread_id: int):
     async with AsyncSession(engine) as session:
         async with session.begin():
@@ -50,7 +70,7 @@ async def get_thread(thread_id: int):
 
             if thread is None:
                 raise HTTPException(status_code=404, detail="Thread not found")
-            return ThreadRead(id=thread.id)
+            return thread
         
         
 @app.post("/threads")
