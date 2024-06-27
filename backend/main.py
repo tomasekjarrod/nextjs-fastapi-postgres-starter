@@ -8,6 +8,7 @@ from schemas import *
 from models import *
 from db_engine import engine
 from seed import seed_user_if_needed, seed_threads_if_needed
+import random
 
 seed_user_if_needed()
 seed_threads_if_needed()
@@ -72,7 +73,8 @@ async def create_thread_message(threadMessage: ThreadMessageCreate):
                 session.add(db_thread_message)
                 await session.flush()
 
-                ai_thread_message = ThreadMessage(content="AI Generated", sender_id=None, thread_id=threadMessage.thread_id)
+                ai_content = "AI generated %s" % random.randint(0, 10)
+                ai_thread_message = ThreadMessage(content=ai_content, sender_id=None, thread_id=threadMessage.thread_id)
                 session.add(ai_thread_message)
                 await session.flush()           
                 await session.refresh(ai_thread_message)
