@@ -1,54 +1,16 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from sqlalchemy import select
-from seed import seed_user_if_needed
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from db_engine import engine
-from models import User, Thread, ThreadMessage
-from datetime import datetime
-from typing import List, Optional
 from sqlalchemy.exc import SQLAlchemyError
-
+from schemas import *
+from models import *
+from db_engine import engine
+from seed import seed_user_if_needed
 
 seed_user_if_needed()
 
 app = FastAPI()
-
-
-class UserRead(BaseModel):
-    id: int
-    name: str
-
-class ThreadMessageBase(BaseModel):
-    content: str
-    sender_id: Optional[int] = None
-    thread_id: int
-
-class ThreadMessageCreate(ThreadMessageBase):
-    pass
-
-class ThreadMessageRead(ThreadMessageBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-class ThreadBase(BaseModel):
-    created_by: int
-
-class ThreadCreate(ThreadBase):
-    pass
-
-class ThreadRead(ThreadBase):
-    id: int
-    created_at: datetime
-    messages: Optional[List[ThreadMessageRead]] = None
-    
-    class Config:
-        from_attributes = True
-
 
 @app.get("/users/me")
 async def get_my_user():
