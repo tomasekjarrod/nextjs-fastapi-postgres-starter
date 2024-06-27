@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { API_URL } from "./constants";
 
-export default function ChatThread({ threadId }: { threadId: number }) {
+export default function ChatThread({
+  threadId,
+  userId,
+}: {
+  threadId: number;
+  userId: number;
+}) {
   const [messages, setMessages] = useState<Array<ThreadMessage>>([]);
 
   const fetchMessages = async () => {
@@ -18,9 +24,34 @@ export default function ChatThread({ threadId }: { threadId: number }) {
     fetchMessages();
   }, [threadId]);
 
+  const sendMessage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
+
   return (
-    <div className="flex flex-col">
-      <form>
+    <div className="flex flex-col gap-4">
+      <div className="h-96 overflow-y-auto p-2 border-b border-gray-200">
+        {messages.length === 0 && <p>Send your first message</p>}
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${
+              message.sender_id !== null ? "justify-end" : "justify-start"
+            } mb-2`}
+          >
+            <div
+              className={`max-w-xs rounded-lg px-4 py-2 ${
+                message.sender_id !== null
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-800"
+              }`}
+            >
+              {message.content}
+            </div>
+          </div>
+        ))}
+      </div>
+      <form onSubmit={sendMessage}>
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"

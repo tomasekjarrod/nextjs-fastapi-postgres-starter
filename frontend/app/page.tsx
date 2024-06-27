@@ -23,6 +23,7 @@ export default function Home() {
     );
 
     setThreads(threads);
+    setSelectedThread(threads[0] || null)
   };
 
   // Fetch user & all threads on init
@@ -48,7 +49,10 @@ export default function Home() {
                 <div
                   key={thread.id}
                   onClick={() => setSelectedThread(thread)}
-                  className="flex justify-center items-center bg-white shadow-md rounded px-8 pt-6 pb-8 cursor-pointer hover:bg-gray-100"
+                  className={
+                    `flex justify-center items-center bg-white shadow-md rounded px-8 pt-6 pb-8 cursor-pointer hover:bg-gray-100
+                    ${selectedThread?.id === thread.id ? 'bg-blue-200 hover:bg-blue-100': ''}`
+                  }
                 >
                   Thread ID ({thread.id})
                 </div>
@@ -56,8 +60,10 @@ export default function Home() {
             })}
         </div>
 
-        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          {selectedThread && <ChatThread threadId={selectedThread.id} />}
+        <div className="bg-white shadow-md rounded p-8">
+          {selectedThread && user && (
+            <ChatThread threadId={selectedThread.id} userId={user.id} />
+          )}
         </div>
       </div>
     </main>
