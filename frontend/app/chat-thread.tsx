@@ -10,7 +10,8 @@ export default function ChatThread({
   threadId: number;
   userId: number;
 }) {
-  const [messages, setMessages] = useState<Array<ThreadMessage>>([]);
+  const [messages, setMessages] = useState<Array<ChatThreadMessage>>([]);
+  const [input, setInput] = useState("");
 
   const fetchMessages = async () => {
     const messages = await fetch(
@@ -26,15 +27,35 @@ export default function ChatThread({
 
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const message: ChatThreadMessage = {
+      content: input,
+      sender_id: userId,
+      thread_id: threadId,
+    };
+
+    // Push message before Promise resolves for better UX
+    setMessages((prevValue) => [...prevValue, message]);
+    setInput("");
+
+    fetch(`${API_URL}/thread_messages_with_ai`, {
+      method: "POST",
+      body: JSON.stringify(message),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((aiMessage) => {
+        setMessages((prevValue) => [...prevValue, aiMessage]);
+      });
   };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="h-96 overflow-y-auto p-2 border-b border-gray-200">
         {messages.length === 0 && <p>Send your first message</p>}
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div
-            key={message.id}
+            key={index}
             className={`flex ${
               message.sender_id !== null ? "justify-end" : "justify-start"
             } mb-2`}
@@ -64,6 +85,8 @@ export default function ChatThread({
             id="message"
             type="text"
             placeholder="Enter your message"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
           />
         </div>
         <div className="mb-6 text-center">

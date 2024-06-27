@@ -16,3 +16,5 @@ type ThreadMessage = {
   thread_id: number;
   created_at: Date;
 };
+
+type ChatThreadMessage = Omit<ThreadMessage, "id" | "created_at">;
