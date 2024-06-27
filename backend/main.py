@@ -42,35 +42,6 @@ async def get_threads():
             threads = result.scalars().all()
 
             return list(map(lambda thread: ThreadRead(id=thread.id, created_at=thread.created_at, created_by=thread.created_by), threads))
-        
-
-@app.get("/threads/{thread_id}", response_model=ThreadRead)
-async def get_thread(thread_id: int):
-    async with AsyncSession(engine) as session:
-        async with session.begin():
-            # TODO: Change to eager loading from over eager loading            
-            result = await session.execute(select(Thread).options(joinedload(Thread.messages)).filter(Thread.id == thread_id))
-            thread = result.scalars().first()
-
-            if thread is None:
-                raise HTTPException(status_code=404, detail="Thread not found")
-            return ThreadRead(id=thread.id, created_by=thread.created_by, created_at=thread.created_at, messages=thread.messages)
-        
-        
-@app.post("/threads", response_model=ThreadRead)
-async def create_thread(thread: ThreadCreate):
-    async with AsyncSession(engine) as session:
-        async with session.begin():
-            # TODO: Check that created_by exists in user     
-            try:
-                db_thread = Thread(**thread.model_dump())
-                session.add(db_thread)
-                await session.flush()
-                await session.refresh(db_thread)
-                return ThreadRead(id=db_thread.id, created_by=db_thread.created_by, created_at=db_thread.created_at)
-            except SQLAlchemyError as e:
-                await session.rollback()
-                raise HTTPException(status_code=400, detail=str(e))
             
             
 @app.get("/thread_messages", response_model=List[ThreadMessageRead])
@@ -88,7 +59,8 @@ async def get_thread_messages(thread_id: int):
                 created_at=thread_message.created_at
             )
             return list(map(fn, threadMessages))
-            
+
+
 @app.post("/thread_messages_with_ai")
 async def create_thread_message(threadMessage: ThreadMessageCreate):
     async with AsyncSession(engine) as session:
