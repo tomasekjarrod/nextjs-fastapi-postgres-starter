@@ -23,7 +23,8 @@ export default function Home() {
     );
 
     setThreads(threads);
-    setSelectedThread(threads[0] || null)
+    // Set a default thread
+    setSelectedThread(threads[0] || null);
   };
 
   // Fetch user & all threads on init
@@ -37,34 +38,31 @@ export default function Home() {
       <h1>Hello, {user !== null && <span>{user.name}</span>}</h1>
       <div className="flex flex-row gap-6">
         <div className="flex flex-col gap-2">
-          <button
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded disabled opacity-50"
-            type="button"
-          >
-            Start new thread
-          </button>
+          <h1 className="font-bold">Threads</h1>
+          <hr />
           {threads.length !== 0 &&
             threads.map((thread) => {
               return (
                 <div
                   key={thread.id}
                   onClick={() => setSelectedThread(thread)}
-                  className={
-                    `flex justify-center items-center bg-white shadow-md rounded px-8 pt-6 pb-8 cursor-pointer hover:bg-gray-100
-                    ${selectedThread?.id === thread.id ? 'bg-blue-200 hover:bg-blue-100': ''}`
-                  }
+                  className={`flex justify-center items-center bg-white shadow-md rounded px-8 pt-6 pb-8 cursor-pointer hover:bg-gray-100
+                    ${
+                      selectedThread?.id === thread.id
+                        ? "bg-blue-200 hover:bg-blue-100"
+                        : ""
+                    }`}
                 >
                   Thread ID ({thread.id})
                 </div>
               );
             })}
         </div>
-
-        <div className="bg-white shadow-md rounded p-8">
-          {selectedThread && user && (
+        {selectedThread && user && (
+          <div className="bg-white shadow-md rounded p-8">
             <ChatThread threadId={selectedThread.id} userId={user.id} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </main>
   );
