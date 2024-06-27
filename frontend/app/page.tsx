@@ -14,7 +14,7 @@ export default function Home() {
       res.json()
     );
 
-    setUser(user);
+    return user;
   };
 
   const fetchThreads = async () => {
@@ -22,15 +22,19 @@ export default function Home() {
       res.json()
     );
 
-    setThreads(threads);
-    // Set a default thread
-    setSelectedThread(threads[0] || null);
+    return threads;
   };
 
   // Fetch user & all threads on init
   useEffect(() => {
-    fetchUser();
-    fetchThreads();
+    Promise.all([fetchUser(), fetchThreads()]).then(([user, threads]) => {
+      setUser(user);
+
+      setThreads(threads);
+
+      // Select a thread by default
+      setSelectedThread(threads[0] || null);
+    }).catch(err => console.error(err));
   }, []);
 
   return (
