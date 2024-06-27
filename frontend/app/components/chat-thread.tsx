@@ -36,7 +36,7 @@ export default function ChatThread({
 
     setInput("");
 
-    fetch(`${API_URL}/thread_messages_with_ai`, {
+    fetch(`${API_URL}/thread_messages/ai`, {
       method: "POST",
       body: JSON.stringify(message),
       headers: { "Content-Type": "application/json" },
