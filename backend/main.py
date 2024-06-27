@@ -71,7 +71,23 @@ async def create_thread(thread: ThreadCreate):
             except SQLAlchemyError as e:
                 await session.rollback()
                 raise HTTPException(status_code=400, detail=str(e))
+            
+            
+@app.get("/thread_messages", response_model=List[ThreadMessageRead])
+async def get_thread_messages(thread_id: int):
+    async with AsyncSession(engine) as session:
+        async with session.begin():
+            result = await session.execute(select(ThreadMessage).filter(ThreadMessage.thread_id == thread_id))
+            threadMessages = result.scalars().all()
 
+            fn = lambda thread_message: ThreadMessageRead(
+                id=thread_message.id, 
+                content=thread_message.content, 
+                sender_id=thread_message.sender_id, 
+                thread_id=thread_message.thread_id, 
+                created_at=thread_message.created_at
+            )
+            return list(map(fn, threadMessages))
             
 @app.post("/thread_messages_with_ai")
 async def create_thread_message(threadMessage: ThreadMessageCreate):
