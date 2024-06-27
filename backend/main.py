@@ -8,6 +8,9 @@ from db_engine import engine
 from models import User, Thread, ThreadMessage
 from datetime import datetime
 from typing import List, Optional
+from sqlalchemy.exc import SQLAlchemyError
+
+
 seed_user_if_needed()
 
 app = FastAPI()
@@ -41,8 +44,8 @@ class ThreadCreate(ThreadBase):
 class ThreadRead(ThreadBase):
     id: int
     created_at: datetime
-    
     messages: List[ThreadMessageRead]
+    
     class Config:
         from_attributes = True
 
@@ -70,14 +73,22 @@ async def get_thread(thread_id: int):
 
             if thread is None:
                 raise HTTPException(status_code=404, detail="Thread not found")
-            return thread
+            return ThreadRead(id=thread.id, created_by=thread.created_by, created_at=thread.created_at, messages=thread.messages)
         
         
 @app.post("/threads")
 async def create_thread(thread: ThreadCreate):
     async with AsyncSession(engine) as session:
         async with session.begin():
-            await session.execute()
+            try:
+                db_thread = Thread(**thread.model_dump())
+                session.add(db_thread)
+                await session.flush()
+                await session.refresh(db_thread)
+                return db_thread
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise HTTPException(status_code=400, detail=str(e))
             
 @app.post("/thread_messages")
 async def create_thread_message(threadMessage: ThreadMessageCreate):
