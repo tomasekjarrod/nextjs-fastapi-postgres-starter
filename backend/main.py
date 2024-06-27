@@ -63,7 +63,7 @@ async def get_thread_messages(thread_id: int):
             return list(map(fn, threadMessages))
 
 
-@app.post("/thread_messages/ai")
+@app.post("/thread_messages/ai", response_model=ThreadMessageRead)
 async def create_thread_message(threadMessage: ThreadMessageCreate):
     async with AsyncSession(engine) as session:
         async with session.begin():
