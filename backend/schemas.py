@@ -36,7 +36,6 @@ class ThreadCreate(ThreadBase):
 class ThreadRead(ThreadBase):
     id: int
     created_at: datetime
-    messages: Optional[List[ThreadMessageRead]] = None
     
     class Config:
         from_attributes = True

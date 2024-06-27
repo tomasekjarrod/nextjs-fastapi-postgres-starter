@@ -34,6 +34,16 @@ async def get_my_user():
             return UserRead(id=user.id, name=user.name)
 
 
+@app.get("/threads", response_model=List[ThreadRead])
+async def get_threads():
+    async with AsyncSession(engine) as session:
+        async with session.begin():
+            result = await session.execute(select(Thread))
+            threads = result.scalars().all()
+
+            return list(map(lambda thread: ThreadRead(id=thread.id, created_at=thread.created_at, created_by=thread.created_by), threads))
+        
+
 @app.get("/threads/{thread_id}", response_model=ThreadRead)
 async def get_thread(thread_id: int):
     async with AsyncSession(engine) as session:
