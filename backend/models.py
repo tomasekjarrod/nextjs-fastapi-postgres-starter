@@ -1,4 +1,4 @@
-from sqlalchemy import String, DateTime, Integer, ForeignKey, desc, func
+from sqlalchemy import String, DateTime, Integer, ForeignKey, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
@@ -32,7 +32,7 @@ class Thread(Base):
     user = relationship('User', back_populates='threads')
     
     # Relationship to children thread messages, ordered by created_at desc
-    messages = relationship('ThreadMessage', order_by=desc('ThreadMessage.created_at'), back_populates='thread')
+    messages = relationship('ThreadMessage', back_populates='thread')
 
     def __repr__(self) -> str:
         return f"Thread(id={self.id!r}, created_at={self.created_at!r}, created_by={self.created_by!r})"
