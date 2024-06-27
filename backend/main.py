@@ -44,7 +44,7 @@ class ThreadCreate(ThreadBase):
 class ThreadRead(ThreadBase):
     id: int
     created_at: datetime
-    messages: List[ThreadMessageRead]
+    messages: Optional[List[ThreadMessageRead]] = None
     
     class Config:
         from_attributes = True
@@ -76,7 +76,7 @@ async def get_thread(thread_id: int):
             return ThreadRead(id=thread.id, created_by=thread.created_by, created_at=thread.created_at, messages=thread.messages)
         
         
-@app.post("/threads")
+@app.post("/threads", response_model=ThreadRead)
 async def create_thread(thread: ThreadCreate):
     async with AsyncSession(engine) as session:
         async with session.begin():
@@ -85,13 +85,29 @@ async def create_thread(thread: ThreadCreate):
                 session.add(db_thread)
                 await session.flush()
                 await session.refresh(db_thread)
-                return db_thread
+                return ThreadRead(id=db_thread.id, created_by=db_thread.created_by, created_at=db_thread.created_at)
             except SQLAlchemyError as e:
                 await session.rollback()
                 raise HTTPException(status_code=400, detail=str(e))
+
             
 @app.post("/thread_messages")
 async def create_thread_message(threadMessage: ThreadMessageCreate):
     async with AsyncSession(engine) as session:
         async with session.begin():
-            await session.execute()
+            try:
+                db_thread_message = ThreadMessage(**threadMessage.model_dump())
+                session.add(db_thread_message)
+                await session.flush()
+                await session.refresh(db_thread_message)
+                                
+                return ThreadMessageRead(
+                    id=db_thread_message.id, 
+                    content=db_thread_message.content, 
+                    sender_id=db_thread_message.sender_id, 
+                    thread_id=db_thread_message.thread_id, 
+                    created_at=db_thread_message.created_at
+                )
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise HTTPException(status_code=400, detail=str(e))
