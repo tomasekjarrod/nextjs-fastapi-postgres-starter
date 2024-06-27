@@ -41,7 +41,8 @@ async def get_thread(thread_id: int):
 @app.post("/threads", response_model=ThreadRead)
 async def create_thread(thread: ThreadCreate):
     async with AsyncSession(engine) as session:
-        async with session.begin():            
+        async with session.begin():
+            # TODO: Check that created_by exists in user     
             try:
                 db_thread = Thread(**thread.model_dump())
                 session.add(db_thread)
@@ -57,6 +58,8 @@ async def create_thread(thread: ThreadCreate):
 async def create_thread_message(threadMessage: ThreadMessageCreate):
     async with AsyncSession(engine) as session:
         async with session.begin():
+            # TODO: Check that sender_id exists in user     
+            # TODO: Check that thread_id exists in thread
             try:
                 db_thread_message = ThreadMessage(**threadMessage.model_dump())
                 session.add(db_thread_message)
