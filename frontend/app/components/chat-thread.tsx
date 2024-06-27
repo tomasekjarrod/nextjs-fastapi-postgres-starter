@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { API_URL } from "./constants";
+import { API_URL } from "../constants";
 
 export default function ChatThread({
   threadId,
@@ -34,8 +34,6 @@ export default function ChatThread({
       thread_id: threadId,
     };
 
-    // Push message before Promise resolves for better UX
-    setMessages((prevValue) => [...prevValue, message]);
     setInput("");
 
     fetch(`${API_URL}/thread_messages_with_ai`, {
@@ -45,7 +43,8 @@ export default function ChatThread({
     })
       .then((res) => res.json())
       .then((aiMessage) => {
-        setMessages((prevValue) => [...prevValue, aiMessage]);
+        // Push user and AI message to the message thread
+        setMessages((prevValue) => [...prevValue, message, aiMessage]);
       });
   };
 
@@ -85,6 +84,7 @@ export default function ChatThread({
             id="message"
             type="text"
             placeholder="Enter your message"
+            required
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />

@@ -7,9 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from schemas import *
 from models import *
 from db_engine import engine
-from seed import seed_user_if_needed
+from seed import seed_user_if_needed, seed_threads_if_needed
 
 seed_user_if_needed()
+seed_threads_if_needed()
 
 app = FastAPI()
 
@@ -48,6 +49,7 @@ async def get_threads():
 async def get_thread_messages(thread_id: int):
     async with AsyncSession(engine) as session:
         async with session.begin():
+            # In the future, thread_id would be an optional parameter to apply to the query
             result = await session.execute(select(ThreadMessage).filter(ThreadMessage.thread_id == thread_id))
             threadMessages = result.scalars().all()
 
@@ -65,8 +67,6 @@ async def get_thread_messages(thread_id: int):
 async def create_thread_message(threadMessage: ThreadMessageCreate):
     async with AsyncSession(engine) as session:
         async with session.begin():
-            # TODO: Check that sender_id exists in user     
-            # TODO: Check that thread_id exists in thread
             try:
                 db_thread_message = ThreadMessage(**threadMessage.model_dump())
                 session.add(db_thread_message)

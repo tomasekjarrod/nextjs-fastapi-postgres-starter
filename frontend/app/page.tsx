@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ChatThread from "./chat-thread";
+import ChatThread from "./components/chat-thread";
 import { API_URL } from "./constants";
 
 export default function Home() {
