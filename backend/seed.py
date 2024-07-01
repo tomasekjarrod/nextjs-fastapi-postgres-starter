@@ -19,7 +19,7 @@ def seed_threads_if_needed():
         with session.begin():
             thread_count = session.execute(select(func.count(Thread.id))).scalar_one()
             if thread_count == 2:
-                print("Exactly two users already exist, skipping seeding")
+                print("Exactly two threads already exist, skipping seeding")
                 return
             
             result = session.execute(select(User))

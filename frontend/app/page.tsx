@@ -50,11 +50,11 @@ export default function Home() {
                 <div
                   key={thread.id}
                   onClick={() => setSelectedThread(thread)}
-                  className={`flex justify-center items-center bg-white shadow-md rounded px-8 pt-6 pb-8 cursor-pointer hover:bg-gray-100
+                  className={`flex justify-center items-center shadow-md rounded px-8 pt-6 pb-8 cursor-pointer
                     ${
                       selectedThread?.id === thread.id
                         ? "bg-blue-200 hover:bg-blue-100"
-                        : ""
+                        : "bg-white hover:bg-gray-100"
                     }`}
                 >
                   Thread ID ({thread.id})
